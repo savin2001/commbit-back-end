@@ -14,10 +14,10 @@ const getAllUsersController = (connection) => async (req, res) => {
   }
 };
 
-// Controller to get a user by ID
+// Controller to get a user by email
 const getUserServiceByIdController = (connection) => async (req, res) => {
   try {
-    const serviceId = req.params.id;
+    const serviceId = req.body.email;
     const service = await userService.getUserServiceById(connection, serviceId);
     res.status(200).json(service);
     // console.log("get one user controller running");

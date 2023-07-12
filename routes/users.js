@@ -14,9 +14,9 @@ const {
 
 function UserRouter(connection) {
   router.get('/all', getAllUsersController(connection));
-  router.get('/user/:id', getUserServiceByIdController(connection));
+  router.get('/user', getUserServiceByIdController(connection));
   router.post('/post', postUserServiceController(connection));
-  router.put('/update/:id', updateUserServiceController(connection));
+  router.put('/update', updateUserServiceController(connection));
   router.put('/disable', disableUserServiceController(connection));
   router.put('/enable', enableUserServiceController(connection));
   router.get('/count', getUserCountController(connection));

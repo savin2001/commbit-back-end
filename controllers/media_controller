@@ -1,0 +1,85 @@
+const mediaService = require("../services/media_service");
+
+// Get all media
+const getAllMediaController = (connection) => async (req, res) => {
+  try {
+    const media = await mediaService.getAllMedia(connection);
+    res.status(200).json(media);
+    console.log("Get all media controller running");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error retrieving media",
+    });
+  }
+};
+
+// Get specific media
+const getMediaByIdController = (connection) => async (req, res) => {
+  try {
+    const mediaId = req.params.id;
+    const media = await mediaService.getMediaByIdService(connection, mediaId);
+    res.status(200).json(media);
+    // console.log('get media by id controller running');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error retrieving media",
+    });
+  }
+};
+
+// Getting media under specific events
+const getMediaByEventIdController = (connection) => async (req, res) => {
+  try {
+    const eventId = req.params.id;
+    const media = await mediaService.getMediaByEventId(connection, eventId);
+    res.status(200).json(media);
+    console.log("Get media by event_id controller running");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error retrieving media",
+    });
+  }
+};
+
+// Controller function to get media uploaded by a specific user
+const getMediaByUserController = (connection) => async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    console.log(req.body.email)
+    const media = await mediaService.getMediaByUserId(connection, userEmail);
+    res.status(200).json(media);
+    console.log("Get media by user_id controller running");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error retrieving media",
+    });
+  }
+};
+
+// Controller function to get media uploaded by other users
+const getMediaByOtherUsersController = (connection) => async (req, res) => {
+  try {
+    const userEmail = req.params.email;
+    const media = await mediaService.getMediaByOtherUsers(connection, userEmail);
+    res.status(200).json(media);
+    console.log('Get media by other users controller running');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: error.message,
+      message: "Error retrieving media uploaded by other users",
+    });
+  }
+};
+
+module.exports = {
+  getMediaByIdController,
+  getAllMediaController,
+  getMediaByEventIdController,
+  getMediaByOtherUsersController,
+  getMediaByUserController,
+};

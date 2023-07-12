@@ -13,10 +13,10 @@ const getAllUsersServices = async (connection) => {
   });
 };
 
-// Retrieves a user by their ID from the database
+// Retrieves a user by their email from the database
 const getUserServiceById = async (connection, serviceId) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users WHERE id = ?';
+    const query = 'SELECT * FROM users WHERE email = ?';
     connection.query(query, [serviceId], (error, results, fields) => {
       if (error) {
         reject(error);
