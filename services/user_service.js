@@ -1,7 +1,7 @@
 // Retrieves all users from the database
 const getAllUsersServices = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users';
+    const query = "SELECT * FROM users";
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -16,7 +16,7 @@ const getAllUsersServices = async (connection) => {
 // Retrieves a user by their email from the database
 const getUserServiceById = async (connection, serviceId) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users WHERE email = ?';
+    const query = "SELECT * FROM users WHERE email = ?";
     connection.query(query, [serviceId], (error, results, fields) => {
       if (error) {
         reject(error);
@@ -28,30 +28,61 @@ const getUserServiceById = async (connection, serviceId) => {
   });
 };
 
+// Login the user
+const loginUserService = async (connection, email) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT u.email, u.first_name, u.last_name, u.phone_number, ur.role_name AS user_type
+      FROM users u
+      JOIN user_role ur ON u.user_type = ur.id
+      WHERE u.email = ? and u.del_flg = 'N'
+    `;
+    connection.query(query, [email], (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0]);
+      }
+    });
+    console.log("login user service running");
+  }); 
+};
+
 // Creates a new user in the database
 const postUserService = async (connection, service) => {
   return new Promise((resolve, reject) => {
     const { email, first_name, last_name, phone_number, user_type } = service;
-    const selectQuery = 'SELECT id FROM user_role WHERE role_name = ?';
+    const selectQuery = "SELECT id FROM user_role WHERE role_name = ?";
 
     connection.query(selectQuery, [user_type], (error, results, fields) => {
       if (error) {
         reject(error); // Reject with the SQL error object
       } else {
         if (results.length === 0) {
-          reject(new Error('Invalid user_type'));
+          reject(new Error("Invalid user_type"));
         } else {
           const roleId = results[0].id;
-          const insertQuery = 'INSERT INTO users (email, first_name, last_name, phone_number, user_type) VALUES (?, ?, ?, ?, ?)';
-          const insertParams = [email, first_name, last_name, phone_number, roleId];
+          const insertQuery =
+            "INSERT INTO users (email, first_name, last_name, phone_number, user_type) VALUES (?, ?, ?, ?, ?)";
+          const insertParams = [
+            email,
+            first_name,
+            last_name,
+            phone_number,
+            roleId,
+          ];
 
-          connection.query(insertQuery, insertParams, (error, results, fields) => {
-            if (error) {
-              reject(error); // Reject with the SQL error object
-            } else {
-              resolve(results);
+          connection.query(
+            insertQuery,
+            insertParams,
+            (error, results, fields) => {
+              if (error) {
+                reject(error); // Reject with the SQL error object
+              } else {
+                resolve(results);
+              }
             }
-          });
+          );
         }
       }
     });
@@ -64,14 +95,18 @@ const updateUserService = async (connection, serviceEmail, updatedService) => {
     const { first_name, last_name, phone_number } = updatedService;
     const updatedValues = { first_name, last_name, phone_number };
 
-    const query = 'UPDATE users SET ? WHERE email = ?';
-    connection.query(query, [updatedValues, serviceEmail], (error, results, fields) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
+    const query = "UPDATE users SET ? WHERE email = ?";
+    connection.query(
+      query,
+      [updatedValues, serviceEmail],
+      (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
       }
-    });
+    );
     // // console.log('user update service running');
   });
 };
@@ -79,16 +114,20 @@ const updateUserService = async (connection, serviceEmail, updatedService) => {
 // Disables a user by changing their 'del_flg' to 'Y'
 const disableUserService = async (connection, serviceEmail) => {
   return new Promise((resolve, reject) => {
-    const updatedValues = { del_flg: 'Y' };
+    const updatedValues = { del_flg: "Y" };
 
-    const query = 'UPDATE users SET ? WHERE email = ?';
-    connection.query(query, [updatedValues, serviceEmail], (error, results, fields) => {
-      if (error) {
-        reject(error);
-      } else {
-        resolve(results);
+    const query = "UPDATE users SET ? WHERE email = ?";
+    connection.query(
+      query,
+      [updatedValues, serviceEmail],
+      (error, results, fields) => {
+        if (error) {
+          reject(error);
+        } else {
+          resolve(results);
+        }
       }
-    });
+    );
     // console.log('disable user service running');
   });
 };
@@ -96,7 +135,7 @@ const disableUserService = async (connection, serviceEmail) => {
 // Get the total count of all users
 const getUserCountService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT COUNT(*) AS total_users FROM users';
+    const query = "SELECT COUNT(*) AS total_users FROM users";
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -111,7 +150,8 @@ const getUserCountService = async (connection) => {
 // Get the total count of disabled users
 const getUserCountDisabledService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT COUNT(*) AS total_disabled_users FROM users WHERE del_flg = "Y"';
+    const query =
+      'SELECT COUNT(*) AS total_disabled_users FROM users WHERE del_flg = "Y"';
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -126,7 +166,8 @@ const getUserCountDisabledService = async (connection) => {
 // Get the total count of active users
 const getUserCountActiveService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT COUNT(*) AS total_not_disabled_users FROM users WHERE del_flg = "N"';
+    const query =
+      'SELECT COUNT(*) AS total_not_disabled_users FROM users WHERE del_flg = "N"';
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -183,10 +224,10 @@ const enableUserService = async (connection, serviceEmail) => {
   });
 };
 
-
 module.exports = {
   getAllUsersServices,
   getUserServiceById,
+  loginUserService,
   postUserService,
   updateUserService,
   disableUserService,
@@ -195,5 +236,5 @@ module.exports = {
   getUserCountDisabledService,
   getUserCountActiveService,
   getUserListDisabledService,
-  getUserListActiveService
+  getUserListActiveService,
 };

@@ -18,6 +18,7 @@ const getAllUsersController = (connection) => async (req, res) => {
 const getUserServiceByIdController = (connection) => async (req, res) => {
   try {
     const serviceId = req.body.email;
+    console.log(serviceId);
     const service = await userService.getUserServiceById(connection, serviceId);
     res.status(200).json(service);
     // console.log("get one user controller running");
@@ -55,6 +56,34 @@ const postUserServiceController = (connection) => async (req, res) => {
       message: "Failed to register user",
     });
     // console.log(req.body);
+  }
+};
+
+const loginUserController = (connection) => async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await userService.loginUserService(connection, email);
+    if (user) {
+      // User found, proceed with authentication logic
+      // You can check the password here and generate authentication tokens
+      // Return appropriate response based on successful authentication
+      res.status(200).json({
+        message: "User login successful",
+        user,
+      });
+    } else {
+      // User not found or invalid email
+      res.status(404).json({
+        message: "User not found",
+      });
+    }
+    console.log("login user controller running");
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      message: "Error during user login",
+      error: error.message,
+    });
   }
 };
 
@@ -212,6 +241,7 @@ const getUserListActiveController = (connection) => async (req, res) => {
 module.exports = {
   getAllUsersController,
   getUserServiceByIdController,
+  loginUserController,
   postUserServiceController,
   updateUserServiceController,
   disableUserServiceController,
