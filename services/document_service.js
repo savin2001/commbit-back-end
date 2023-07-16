@@ -136,9 +136,37 @@ const getDocumentsBySubcategoryService = async (
 ) => {
   return new Promise((resolve, reject) => {
     console.log(subcategoryName);
-    const query =
-      "SELECT * FROM documents WHERE subcategory_id = (SELECT id FROM document_subcategories WHERE name = ?)";
+    const query = `
+  SELECT d.id, d.filename, u.first_name as uploaded_by, u.email as user_email, d.created_at, d.del_flg as deleted, ds.name AS document_group
+  FROM documents d
+  JOIN users u ON d.uploaded_by = u.id
+  JOIN document_subcategories ds ON d.subcategory_id = ds.id
+  WHERE d.subcategory_id = (SELECT id FROM document_subcategories WHERE name = ?);
+`;
+
     connection.query(query, [subcategoryName], (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+    console.log("Get documents by subcategory service running");
+  });
+};
+
+//   Fetching by sub-categories
+const getDocumentSubcategoriesWithDocumentsService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT ds.id AS subcategory_id, ds.name AS document_subcategory_name, COUNT(d.id) AS document_count
+      FROM document_subcategories ds
+      LEFT JOIN documents d ON ds.id = d.subcategory_id
+      GROUP BY ds.id, ds.name
+      HAVING COUNT(d.id) >= 1;
+    `;
+
+    connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
       } else {
@@ -240,7 +268,6 @@ const createDocumentService = async (connection, document) => {
   });
 };
 
-
 // Disable viewing of document by ID
 const disableDocumentService = async (connection, documentId) => {
   return new Promise((resolve, reject) => {
@@ -277,6 +304,7 @@ module.exports = {
   getUserDocumentsService,
   getOtherUserDocumentsService,
   getDocumentsBySubcategoryService,
+  getDocumentSubcategoriesWithDocumentsService,
   getAllDocumentCategoriesService,
   getAllSubcategoriesByCategoryService,
   createDocumentService,

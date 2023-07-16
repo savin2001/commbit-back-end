@@ -14,6 +14,24 @@ const getAllDocumentsController = (connection) => async (req, res) => {
   }
 };
 
+// Getting all documents from database
+const getDocumentSubcategoriesWithDocumentsController =
+  (connection) => async (req, res) => {
+    try {
+      const documents =
+        await documentService.getDocumentSubcategoriesWithDocumentsService(
+          connection
+        );
+      res.status(200).json(documents);
+      // console.log('Get all documents controller running');
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({
+        message: "Error retrieving documents",
+      });
+    }
+  };
+
 // Retrieve doc by ID
 const getDocumentByIdController = (connection) => async (req, res) => {
   try {
@@ -79,7 +97,7 @@ const getDocCountController = (connection) => async (req, res) => {
       totalShared,
       totalMine,
     });
-    
+
     console.log("get document count controller running");
   } catch (error) {
     console.error(error);
@@ -119,7 +137,7 @@ const getDocumentsBySubcategoryController =
   (connection) => async (req, res) => {
     try {
       const subcategoryName = req.params.subcategoryName;
-      console.log(subcategoryName)
+      console.log(subcategoryName);
       const documents = await documentService.getDocumentsBySubcategoryService(
         connection,
         subcategoryName
@@ -258,4 +276,5 @@ module.exports = {
   disableDocumentController,
   enableDocumentController,
   getDocCountController,
+  getDocumentSubcategoriesWithDocumentsController,
 };

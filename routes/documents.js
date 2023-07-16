@@ -12,6 +12,7 @@ const {
   disableDocumentController,
   enableDocumentController,
   getDocCountController,
+  getDocumentSubcategoriesWithDocumentsController,
 } = require('../controllers/document_controller');
 
 function DocumentRouter(connection) {
@@ -26,6 +27,8 @@ function DocumentRouter(connection) {
   router.put('/archive/:id', disableDocumentController(connection));
   router.put('/enable/:id', enableDocumentController(connection));
   router.get('/count/:email', getDocCountController(connection));
+  router.get("/sub-with-docs", getDocumentSubcategoriesWithDocumentsController(connection));
+
   
   // console.log('docs runs');
   return router;
