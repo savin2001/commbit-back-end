@@ -43,10 +43,10 @@ const getDocumentByIdController = (connection) => async (req, res) => {
 // Get documents belonging to the user
 const getUserDocumentsController = (connection) => async (req, res) => {
   try {
-    const userEmail = req.body.email;
+    const { email } = req.params;
     const documents = await documentService.getUserDocumentsService(
       connection,
-      userEmail
+      email
     );
 
     res.status(200).json(documents);
@@ -60,13 +60,43 @@ const getUserDocumentsController = (connection) => async (req, res) => {
   }
 };
 
+// Controller to get docs count
+const getDocCountController = (connection) => async (req, res) => {
+  try {
+    const total = await documentService.getDocCountService(connection);
+    const totalDisabled = await documentService.getDocCountDisabledService(
+      connection
+    );
+    const totalActive = await documentService.getDocCountActiveService(
+      connection
+    );
+
+    res.status(200).json({
+      total,
+      totalDisabled,
+      totalActive,
+    });
+    // console.log('get document count controller running');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: error?.message,
+      error_code: error?.code,
+      error_num: error?.errno,
+      reason: error?.sqlMessage,
+      message: "Error retrieving user count",
+    });
+  }
+};
+
 // Shared by other users
 const getOtherUserDocumentsController = (connection) => async (req, res) => {
   try {
-    const userEmail = req.body.email;
+    const { email } = req.params;
+    console.log(email)
     const documents = await documentService.getOtherUserDocumentsService(
       connection,
-      userEmail
+      email
     );
 
     res.status(200).json(documents);
@@ -92,7 +122,7 @@ const getDocumentsBySubcategoryController =
 
       res.status(200).json(documents);
 
-      console.log("Get documents by subcategory controller running");
+      // console.log("Get documents by subcategory controller running");
     } catch (error) {
       console.error(error);
       res.status(500).json({
@@ -221,4 +251,5 @@ module.exports = {
   createDocumentController,
   disableDocumentController,
   enableDocumentController,
+  getDocCountController,
 };

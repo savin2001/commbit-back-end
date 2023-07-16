@@ -172,18 +172,18 @@ const enableUserServiceController = (connection) => async (req, res) => {
 // Controller to get user count
 const getUserCountController = (connection) => async (req, res) => {
   try {
-    const totalUsers = await userService.getUserCountService(connection);
-    const totalDisabledUsers = await userService.getUserCountDisabledService(
+    const total = await userService.getUserCountService(connection);
+    const totalDisabled = await userService.getUserCountDisabledService(
       connection
     );
-    const totalActiveUsers = await userService.getUserCountActiveService(
+    const totalActive= await userService.getUserCountActiveService(
       connection
     );
 
     res.status(200).json({
-      totalUsers,
-      totalDisabledUsers,
-      totalActiveUsers,
+      total,
+      totalDisabled,
+      totalActive,
     });
     // console.log('get user count controller running');
   } catch (error) {

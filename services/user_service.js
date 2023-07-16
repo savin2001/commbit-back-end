@@ -1,7 +1,11 @@
 // Retrieves all users from the database
 const getAllUsersServices = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM users";
+    const query = `
+    SELECT u.*, ur.role_name
+    FROM users u
+    JOIN user_role ur ON u.user_type = ur.id
+  `;
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -45,7 +49,7 @@ const loginUserService = async (connection, email) => {
       }
     });
     console.log("login user service running");
-  }); 
+  });
 };
 
 // Creates a new user in the database
@@ -182,7 +186,12 @@ const getUserCountActiveService = async (connection) => {
 // Get the list of disabled users
 const getUserListDisabledService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users WHERE del_flg = "Y"';
+    const query = `
+    SELECT u.*, ur.role_name
+    FROM users u
+    JOIN user_role ur ON u.user_type = ur.id
+    WHERE u.del_flg = 'Y'
+  `;
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -197,7 +206,12 @@ const getUserListDisabledService = async (connection) => {
 // Get the list of active users
 const getUserListActiveService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = 'SELECT * FROM users WHERE del_flg = "N"';
+    const query = `
+    SELECT u.*, ur.role_name
+    FROM users u
+    JOIN user_role ur ON u.user_type = ur.id
+    WHERE u.del_flg = 'N'
+  `;
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);

@@ -1,7 +1,13 @@
 // Get all events
 const getAllEventsService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM events";
+    const query = `
+    SELECT e.*, ac.name AS social_cause, u.email AS organized_by
+    FROM events e
+    JOIN all_categories ac ON e.category_id = ac.id
+    JOIN users u ON e.organizer = u.id
+
+    `;
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -83,7 +89,7 @@ const createEventService = async (connection, eventData) => {
               end_time,
               organizerId,
             ];
-
+            console.log(insertParams);
             connection.query(
               insertQuery,
               insertParams,
@@ -132,6 +138,85 @@ const cancelEventService = async (connection, eventId) => {
   });
 };
 
+// Get the total count of all events
+const getEventCountService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query = "SELECT COUNT(*) AS total_events FROM events";
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_events);
+      }
+    });
+    console.log("get user count service running");
+  });
+};
+
+// Get the total count of disabled events
+const getEventCountDisabledService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      'SELECT COUNT(*) AS total_disabled_events FROM events WHERE del_flg = "Y"';
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_disabled_events);
+      }
+    });
+    // console.log('get disabled user count service running');
+  });
+};
+
+// Get the total count of active events
+const getEventCountActiveService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      'SELECT COUNT(*) AS total_not_disabled_events FROM events WHERE del_flg = "N"';
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_not_disabled_events);
+      }
+    });
+    // console.log('get active user count service running');
+  });
+};
+
+// Disable viewing of event by ID
+const disableEventService = async (connection, eventId) => {
+  return new Promise((resolve, reject) => {
+    const query = 'UPDATE events SET del_flg = "Y" WHERE id = ?';
+    connection.query(query, [eventId], (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+    console.log("disable event service running");
+  });
+};
+
+// Enable events to be viewed
+const enableEventService = async (connection, eventId) => {
+  return new Promise((resolve, reject) => {
+    const query = 'UPDATE events SET del_flg = "N" WHERE id = ?';
+    connection.query(query, [eventId], (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results);
+      }
+    });
+    console.log("enable event service running");
+  });
+};
+
+
+
 module.exports = {
   getAllEventsService,
   getEventByIdService,
@@ -139,4 +224,9 @@ module.exports = {
   createEventService,
   getAllCategoriesService,
   cancelEventService,
+  getEventCountDisabledService,
+  getEventCountActiveService,
+  getEventCountService,
+  enableEventService,
+  disableEventService,
 };

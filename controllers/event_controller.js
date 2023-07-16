@@ -125,6 +125,37 @@ const cancelEventController = (connection) => async (req, res) => {
   }
 };
 
+// Controller to get events count
+const getEventsCountController = (connection) => async (req, res) => {
+  try {
+    const total = await eventService.getEventCountService(connection);
+    const totalDisabled = await eventService.getEventCountDisabledService(
+      connection
+    );
+    const totalActive = await eventService.getEventCountActiveService(
+      connection
+    );
+
+    res.status(200).json({
+      total,
+      totalDisabled,
+      totalActive,
+    });
+    // console.log('get user count controller running');
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({
+      error: error?.message,
+      error_code: error?.code,
+      error_num: error?.errno,
+      reason: error?.sqlMessage,
+      message: "Error retrieving user count",
+    });
+  }
+};
+
+
+
 module.exports = {
   getAllEventsController,
   getEventByIdController,
@@ -132,4 +163,5 @@ module.exports = {
   createEventController,
   getAllCategoriesController,
   cancelEventController,
+  getEventsCountController,
 };

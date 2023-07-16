@@ -7,10 +7,12 @@ const {
   createEventController,
   getAllCategoriesController,
   cancelEventController,
+  getEventsCountController,
 } = require("../controllers/event_controller");
 
 function EventRouter(connection) {
   router.get("/all", getAllEventsController(connection));
+  router.get("/count", getEventsCountController(connection));
   router.get("/event/:id", getEventByIdController(connection));
   router.get("/categories", getAllCategoriesController(connection));
   router.get("/category/:id", getEventsByCategoryController(connection));

@@ -1,7 +1,11 @@
 // Getting all documents in the system
 const getAllDocumentsService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM documents";
+    const query = `SELECT d.*, u.email as user_email, ds.name AS document_group
+    FROM documents d
+    JOIN users u ON d.uploaded_by = u.id
+    JOIN document_subcategories ds ON d.subcategory_id = ds.id
+    `;
     connection.query(query, (error, results, fields) => {
       if (error) {
         reject(error);
@@ -45,6 +49,53 @@ const getUserDocumentsService = async (connection, userEmail) => {
       }
     });
     console.log("Get user documents service running");
+  });
+};
+
+// Get the total count of all documents
+const getDocCountService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query = "SELECT COUNT(*) AS total_docs FROM documents";
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_docs);
+      }
+    });
+    console.log('get user count service running');
+  });
+};
+
+// Get the total count of disabled documents
+const getDocCountDisabledService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      'SELECT COUNT(*) AS total_disabled_docs FROM documents WHERE del_flg = "Y"';
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_disabled_docs);
+      }
+    });
+    // console.log('get disabled user count service running');
+  });
+};
+
+// Get the total count of active documents
+const getDocCountActiveService = async (connection) => {
+  return new Promise((resolve, reject) => {
+    const query =
+      'SELECT COUNT(*) AS total_not_disabled_docs FROM documents WHERE del_flg = "N"';
+    connection.query(query, (error, results, fields) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(results[0].total_not_disabled_docs);
+      }
+    });
+    // console.log('get active user count service running');
   });
 };
 
@@ -185,4 +236,7 @@ module.exports = {
   createDocumentService,
   disableDocumentService,
   enableDocumentService,
+  getDocCountActiveService,
+  getDocCountDisabledService,
+  getDocCountService,
 };

@@ -3,13 +3,14 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const router = require('./routes/index');
+const cors = require('cors');
 
 // Allow data from front-end
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:5173');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
-  next();
-});
+// Enable CORS for all routes
+app.use(cors());
+
+// Allow PUT method for all routes
+app.options('http://localhost:5173', cors({ methods: ['PUT', 'GET', 'POST', 'DELETE'] }));
 
 // Parse incoming JSON requests
 app.use(bodyParser.json());
