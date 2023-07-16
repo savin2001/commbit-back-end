@@ -63,20 +63,24 @@ const getUserDocumentsController = (connection) => async (req, res) => {
 // Controller to get docs count
 const getDocCountController = (connection) => async (req, res) => {
   try {
+    const { email } = req.params;
     const total = await documentService.getDocCountService(connection);
-    const totalDisabled = await documentService.getDocCountDisabledService(
-      connection
+    const totalShared = await documentService.getDocCountSharedService(
+      connection,
+      email
     );
-    const totalActive = await documentService.getDocCountActiveService(
-      connection
+    const totalMine = await documentService.getDocCountMyService(
+      connection,
+      email
     );
 
     res.status(200).json({
       total,
-      totalDisabled,
-      totalActive,
+      totalShared,
+      totalMine,
     });
-    // console.log('get document count controller running');
+    
+    console.log("get document count controller running");
   } catch (error) {
     console.error(error);
     res.status(500).json({
@@ -93,7 +97,7 @@ const getDocCountController = (connection) => async (req, res) => {
 const getOtherUserDocumentsController = (connection) => async (req, res) => {
   try {
     const { email } = req.params;
-    console.log(email)
+    console.log(email);
     const documents = await documentService.getOtherUserDocumentsService(
       connection,
       email

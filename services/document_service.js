@@ -1,7 +1,8 @@
 // Getting all documents in the system
 const getAllDocumentsService = async (connection) => {
   return new Promise((resolve, reject) => {
-    const query = `SELECT d.*, u.email as user_email, ds.name AS document_group
+    const query = `SELECT d.id, d.filename, u.first_name as uploaded_by, u.email as user_email, d.created_at, d.del_flg as deleted,
+    ds.name AS document_group
     FROM documents d
     JOIN users u ON d.uploaded_by = u.id
     JOIN document_subcategories ds ON d.subcategory_id = ds.id
@@ -39,8 +40,15 @@ const getDocumentByIdService = async (connection, documentId) => {
 // Documents that belong to the user
 const getUserDocumentsService = async (connection, userEmail) => {
   return new Promise((resolve, reject) => {
-    const query =
-      "SELECT * FROM documents WHERE uploaded_by = (SELECT id FROM users WHERE email = ?)";
+    const query = `
+    SELECT d.id, d.filename, u.first_name as uploaded_by, u.email as user_email, d.created_at, d.del_flg as deleted,
+        ds.name AS document_group
+    FROM documents d
+    JOIN users u ON d.uploaded_by = u.id
+    JOIN document_subcategories ds ON d.subcategory_id = ds.id
+    WHERE u.email = ?;
+`;
+
     connection.query(query, [userEmail], (error, results, fields) => {
       if (error) {
         reject(error);
@@ -63,47 +71,53 @@ const getDocCountService = async (connection) => {
         resolve(results[0].total_docs);
       }
     });
-    console.log('get user count service running');
+    console.log("get user count service running");
   });
 };
 
-// Get the total count of disabled documents
-const getDocCountDisabledService = async (connection) => {
+// Get the total count of shared documents
+const getDocCountSharedService = async (connection, userEmail) => {
   return new Promise((resolve, reject) => {
     const query =
-      'SELECT COUNT(*) AS total_disabled_docs FROM documents WHERE del_flg = "Y"';
-    connection.query(query, (error, results, fields) => {
+      "SELECT count(*) AS shared_docs FROM documents WHERE uploaded_by != (SELECT id FROM users WHERE email = ?)";
+    connection.query(query, [userEmail], (error, results, fields) => {
       if (error) {
         reject(error);
       } else {
-        resolve(results[0].total_disabled_docs);
+        resolve(results[0].shared_docs);
       }
     });
-    // console.log('get disabled user count service running');
+    console.log("get shared docs count service running");
   });
 };
 
-// Get the total count of active documents
-const getDocCountActiveService = async (connection) => {
+// Get the total count of my documents
+const getDocCountMyService = async (connection, userEmail) => {
   return new Promise((resolve, reject) => {
     const query =
-      'SELECT COUNT(*) AS total_not_disabled_docs FROM documents WHERE del_flg = "N"';
-    connection.query(query, (error, results, fields) => {
+      "SELECT COUNT(*) AS my_docs FROM documents WHERE uploaded_by = (SELECT id FROM users WHERE email = ?)";
+    connection.query(query, [userEmail], (error, results, fields) => {
       if (error) {
         reject(error);
       } else {
-        resolve(results[0].total_not_disabled_docs);
+        resolve(results[0].my_docs);
       }
     });
-    // console.log('get active user count service running');
+    console.log("get my docs count service running");
   });
 };
 
 // Documents shared by other users
 const getOtherUserDocumentsService = async (connection, userEmail) => {
   return new Promise((resolve, reject) => {
-    const query =
-      "SELECT * FROM documents WHERE uploaded_by != (SELECT id FROM users WHERE email = ?)";
+    const query = `
+    SELECT d.id, d.filename, u.first_name as uploaded_by, u.email as user_email, d.created_at, d.del_flg as deleted,
+        ds.name AS document_group
+    FROM documents d
+    JOIN users u ON d.uploaded_by = u.id
+    JOIN document_subcategories ds ON d.subcategory_id = ds.id
+    WHERE u.email != ?;
+`;
     connection.query(query, [userEmail], (error, results, fields) => {
       if (error) {
         reject(error);
@@ -236,7 +250,7 @@ module.exports = {
   createDocumentService,
   disableDocumentService,
   enableDocumentService,
-  getDocCountActiveService,
-  getDocCountDisabledService,
+  getDocCountMyService,
+  getDocCountSharedService,
   getDocCountService,
 };
