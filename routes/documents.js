@@ -19,8 +19,8 @@ function DocumentRouter(connection) {
   router.get('/doc/:id', getDocumentByIdController(connection));
   router.get('/mine/:email', getUserDocumentsController(connection));
   router.get('/shared/:email', getOtherUserDocumentsController(connection));
-  router.get('/docs/:subcategoryId', getDocumentsBySubcategoryController(connection));
-  router.get('/subcategories/:categoryId', getAllSubcategoriesByCategoryController(connection));
+  router.get('/sub/:subcategoryName', getDocumentsBySubcategoryController(connection));
+  router.get('/subcategories/:categoryName', getAllSubcategoriesByCategoryController(connection));
   router.get('/categories', getAllDocumentCategoriesController(connection));
   router.post('/upload', createDocumentController(connection));
   router.put('/archive/:id', disableDocumentController(connection));

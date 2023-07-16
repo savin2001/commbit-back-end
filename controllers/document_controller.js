@@ -118,10 +118,11 @@ const getOtherUserDocumentsController = (connection) => async (req, res) => {
 const getDocumentsBySubcategoryController =
   (connection) => async (req, res) => {
     try {
-      const subcategoryId = req.params.subcategoryId;
+      const subcategoryName = req.params.subcategoryName;
+      console.log(subcategoryName)
       const documents = await documentService.getDocumentsBySubcategoryService(
         connection,
-        subcategoryId
+        subcategoryName
       );
 
       res.status(200).json(documents);
@@ -129,6 +130,7 @@ const getDocumentsBySubcategoryController =
       // console.log("Get documents by subcategory controller running");
     } catch (error) {
       console.error(error);
+      console.error("error");
       res.status(500).json({
         message: "Error retrieving documents by subcategory",
       });
@@ -140,11 +142,11 @@ const getDocumentsBySubcategoryController =
 const getAllSubcategoriesByCategoryController =
   (connection) => async (req, res) => {
     try {
-      const categoryId = req.params.categoryId;
+      const categoryName = req.params.categoryName;
       const subcategories =
         await documentService.getAllSubcategoriesByCategoryService(
           connection,
-          categoryId
+          categoryName
         );
 
       res.status(200).json(subcategories);
@@ -179,8 +181,8 @@ const getAllDocumentCategoriesController = (connection) => async (req, res) => {
 // Uploading a new document
 const createDocumentController = (connection) => async (req, res) => {
   try {
-    const { subcategory_id, filename, file_url, file_size, email } = req.body;
-    const document = { subcategory_id, filename, file_url, file_size, email };
+    const { subcategory_name, filename, file_url, file_size, email } = req.body;
+    const document = { subcategory_name, filename, file_url, file_size, email };
     const result = await documentService.createDocumentService(
       connection,
       document

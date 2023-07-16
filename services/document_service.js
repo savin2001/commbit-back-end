@@ -130,10 +130,15 @@ const getOtherUserDocumentsService = async (connection, userEmail) => {
 };
 
 //   Fetching by sub-categories
-const getDocumentsBySubcategoryService = async (connection, subcategoryId) => {
+const getDocumentsBySubcategoryService = async (
+  connection,
+  subcategoryName
+) => {
   return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM documents WHERE subcategory_id = ?";
-    connection.query(query, [subcategoryId], (error, results, fields) => {
+    console.log(subcategoryName);
+    const query =
+      "SELECT * FROM documents WHERE subcategory_id = (SELECT id FROM document_subcategories WHERE name = ?)";
+    connection.query(query, [subcategoryName], (error, results, fields) => {
       if (error) {
         reject(error);
       } else {
@@ -145,10 +150,14 @@ const getDocumentsBySubcategoryService = async (connection, subcategoryId) => {
 };
 
 //   Fetching subcategories
-const getAllSubcategoriesByCategoryService = async (connection, categoryId) => {
+const getAllSubcategoriesByCategoryService = async (
+  connection,
+  categoryName
+) => {
   return new Promise((resolve, reject) => {
-    const query = "SELECT * FROM document_subcategories WHERE category_id = ?";
-    connection.query(query, [categoryId], (error, results, fields) => {
+    const query =
+      "SELECT * FROM document_subcategories WHERE category_id = (SELECT id FROM document_categories WHERE name = ?)";
+    connection.query(query, [categoryName], (error, results, fields) => {
       if (error) {
         reject(error);
       } else {
@@ -179,26 +188,48 @@ const createDocumentService = async (connection, document) => {
   return new Promise((resolve, reject) => {
     const query =
       "INSERT INTO documents (subcategory_id, filename, file_url, file_size, uploaded_by) VALUES (?, ?, ?, ?, ?)";
-    const { subcategory_id, filename, file_url, file_size, email } = document;
-    const selectQuery = "SELECT id FROM users WHERE email = ?";
 
-    connection.query(selectQuery, [email], (error, results, fields) => {
+    const { subcategory_name, filename, file_url, file_size, email } = document;
+    const selectUserQuery = "SELECT id FROM users WHERE email = ?";
+    const selectSubcategoryQuery =
+      "SELECT id FROM document_subcategories WHERE name = ?";
+
+    // Fetch user ID based on the provided email
+    connection.query(selectUserQuery, [email], (error, userResults, fields) => {
       if (error) {
         reject(error);
       } else {
-        if (results.length === 0) {
+        if (userResults.length === 0) {
           reject(new Error("Invalid email"));
         } else {
-          const uploadedBy = results[0].id;
+          const uploadedBy = userResults[0].id;
 
+          // Fetch subcategory ID based on the provided subcategory_name
           connection.query(
-            query,
-            [subcategory_id, filename, file_url, file_size, uploadedBy],
-            (error, results, fields) => {
+            selectSubcategoryQuery,
+            [subcategory_name],
+            (error, subcategoryResults, fields) => {
               if (error) {
                 reject(error);
               } else {
-                resolve(results);
+                if (subcategoryResults.length === 0) {
+                  reject(new Error("Invalid subcategory"));
+                } else {
+                  const subcategoryId = subcategoryResults[0].id;
+
+                  // Insert the document record with the fetched IDs
+                  connection.query(
+                    query,
+                    [subcategoryId, filename, file_url, file_size, uploadedBy],
+                    (error, insertResults, fields) => {
+                      if (error) {
+                        reject(error);
+                      } else {
+                        resolve(insertResults);
+                      }
+                    }
+                  );
+                }
               }
             }
           );
@@ -208,6 +239,7 @@ const createDocumentService = async (connection, document) => {
     console.log("Create document service running");
   });
 };
+
 
 // Disable viewing of document by ID
 const disableDocumentService = async (connection, documentId) => {
