@@ -1,14 +1,17 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
 const {
+  getAllParticipantsController,
+  getParticipantByIdController,
   createParticipantController,
-} = require("../controllers/participant_controller");
+} = require('../controllers/participant_controller');
 
-function ParticipantRouter(connection) {
-  router.post("/new", createParticipantController(connection));
+function ParticipantsRouter(connection) {
+  router.get('/all', getAllParticipantsController(connection));
+  router.get('/participant/:id', getParticipantByIdController(connection));
+  router.post('/new', createParticipantController(connection));
 
-  // console.log('participants runs');
   return router;
 }
 
-module.exports = ParticipantRouter;
+module.exports = ParticipantsRouter;
