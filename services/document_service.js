@@ -2,7 +2,7 @@
 const getAllDocumentsService = async (connection) => {
   return new Promise((resolve, reject) => {
     const query = `SELECT d.id, d.filename, u.first_name as uploaded_by, u.email as user_email, d.created_at, d.del_flg as deleted,
-    ds.name AS document_group
+    ds.name AS document_group, d.file_url as file_url
     FROM documents d
     JOIN users u ON d.uploaded_by = u.id
     JOIN document_subcategories ds ON d.subcategory_id = ds.id
